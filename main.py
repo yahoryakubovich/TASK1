@@ -10,85 +10,104 @@ DB_USER = 'postgres'
 DB_PASSWORD = '12345678'
 
 # Функция для чтения данных из JSON файла
-def read_json(file_path):
-    with open(file_path, 'r') as file:
-        data = json.load(file)
-    return data
+class JsonDataReader:
+    @staticmethod
+    def read(file_path):
+        with open(file_path, 'r') as file:
+            data = json.load(file)
+        return data
 
 # Функция для подключения к базе данных
-def connect_to_database():
-    connection = psycopg2.connect(
-        host=DB_HOST,
-        port=DB_PORT,
-        database=DB_NAME,
-        user=DB_USER,
-        password=DB_PASSWORD
-    )
-    return connection
+class DatabaseConnector:
+    def __init__(self, host, port, database, user, password):
+        self.host = host
+        self.port = port
+        self.database = database
+        self.user = user
+        self.password = password
+        self.connection = None
+
+    def connect(self):
+        self.connection = psycopg2.connect(
+            host=self.host,
+            port=self.port,
+            database=self.database,
+            user=self.user,
+            password=self.password
+        )
+
+    def close(self):
+        if self.connection:
+            self.connection.close()
 
 # Функция для создания таблицы Rooms
-def create_rooms_table(connection):
-    with connection.cursor() as cursor:
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS rooms (
-                id SERIAL PRIMARY KEY,
-                name VARCHAR(255) NOT NULL
-            );
-        """)
-    connection.commit()
+class DatabaseManager:
+    def __init__(self, connection):
+        self.connection = connection
 
-# Функция для создания таблицы Students
-def create_students_table(connection):
-    with connection.cursor() as cursor:
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS students (
-                id SERIAL PRIMARY KEY,
-                name VARCHAR(255) NOT NULL,
-                birthday DATE NOT NULL,
-                sex CHAR(1) NOT NULL,
-                room_id INT REFERENCES rooms(id)
-            );
-        """)
-    connection.commit()
+    def create_rooms_table(self):
+        with self.connection.cursor() as cursor:
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS rooms (
+                    id SERIAL PRIMARY KEY,
+                    name VARCHAR(255) NOT NULL
+                );
+            """)
+        self.connection.commit()
 
-# Функция для вставки данных в таблицу Rooms
-def insert_rooms_data(connection, rooms_data):
-    with connection.cursor() as cursor:
-        for room in rooms_data:
-            cursor.execute(sql.SQL("""
-                INSERT INTO rooms (id, name)
-                VALUES (%s, %s);
-            """), (room['id'], room['name']))
-    connection.commit()
+    def create_students_table(self):
+        with self.connection.cursor() as cursor:
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS students (
+                    id SERIAL PRIMARY KEY,
+                    name VARCHAR(255) NOT NULL,
+                    birthday DATE NOT NULL,
+                    sex CHAR(1) NOT NULL,
+                    room_id INT REFERENCES rooms(id)
+                );
+            """)
+        self.connection.commit()
 
-# Функция для вставки данных в таблицу Students
-def insert_students_data(connection, students_data):
-    with connection.cursor() as cursor:
-        for student in students_data:
-            cursor.execute(sql.SQL("""
-                INSERT INTO students (id, name, birthday, sex, room_id)
-                VALUES (%s, %s, %s, %s, %s);
-            """), (student['id'], student['name'], student['birthday'], student['sex'], student['room']))
-    connection.commit()
+    def insert_rooms_data(self, rooms_data):
+        with self.connection.cursor() as cursor:
+            for room in rooms_data:
+                cursor.execute(sql.SQL("""
+                    INSERT INTO rooms (id, name)
+                    VALUES (%s, %s);
+                """), (room['id'], room['name']))
+        self.connection.commit()
+
+    def insert_students_data(self, students_data):
+        with self.connection.cursor() as cursor:
+            for student in students_data:
+                cursor.execute(sql.SQL("""
+                    INSERT INTO students (id, name, birthday, sex, room_id)
+                    VALUES (%s, %s, %s, %s, %s);
+                """), (student['id'], student['name'], student['birthday'], student['sex'], student['room']))
+        self.connection.commit()
 
 if __name__ == "__main__":
     rooms_file_path = 'rooms.json'
     students_file_path = 'students.json'
 
-    # Чтение данных из JSON файлов
-    rooms_data = read_json(rooms_file_path)
-    students_data = read_json(students_file_path)
-
     # Подключение к базе данных
-    connection = connect_to_database()
+    db_connector = DatabaseConnector(DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASSWORD)
+    db_connector.connect()
+
+    # Создание объекта класса DatabaseManager
+    database_manager = DatabaseManager(db_connector.connection)
 
     # Создание таблиц
-    create_rooms_table(connection)
-    create_students_table(connection)
+    database_manager.create_rooms_table()
+    database_manager.create_students_table()
+
+    # Чтение данных из JSON файлов
+    rooms_data = JsonDataReader.read(rooms_file_path)
+    students_data = JsonDataReader.read(students_file_path)
 
     # Вставка данных в таблицы
-    insert_rooms_data(connection, rooms_data)
-    insert_students_data(connection, students_data)
+    database_manager.insert_rooms_data(rooms_data)
+    database_manager.insert_students_data(students_data)
 
     # Закрытие подключения
-    connection.close()
+    db_connector.close()
