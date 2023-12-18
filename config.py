@@ -1,5 +1,0 @@
-DB_HOST = 'localhost'
-DB_PORT = '5432'
-DB_NAME = 'dormitory'
-DB_USER = 'postgres'
-DB_PASSWORD = '831212'
