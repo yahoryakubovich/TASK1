@@ -44,3 +44,6 @@ FROM rooms
 INNER JOIN students ON rooms.id = students.room_id
 GROUP BY rooms.id, rooms.name
 HAVING COUNT(DISTINCT students.sex) > 1;
+
+python3 main.py /home/yahoryakubovich/Desktop/TASK1/students.json /home/yahoryakubovich/Desktop/TASK1/rooms.json json
+python3 main.py /home/yahoryakubovich/Desktop/TASK1/students.json /home/yahoryakubovich/Desktop/TASK1/rooms.json xml
