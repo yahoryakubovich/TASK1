@@ -1,11 +1,12 @@
+from typing import List, Dict, Any
 from psycopg2 import sql
 
 
 class DatabaseManager:
-    def __init__(self, connection):
+    def __init__(self, connection) -> None:
         self.connection = connection
 
-    def create_rooms_table(self):
+    def create_rooms_table(self) -> None:
         with self.connection.cursor() as cursor:
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS rooms (
@@ -15,7 +16,7 @@ class DatabaseManager:
             """)
         self.connection.commit()
 
-    def create_students_table(self):
+    def create_students_table(self) -> None:
         with self.connection.cursor() as cursor:
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS students (
@@ -28,7 +29,7 @@ class DatabaseManager:
             """)
         self.connection.commit()
 
-    def insert_rooms_data(self, rooms_data):
+    def insert_rooms_data(self, rooms_data: List[Dict[str, Any]]) -> None:
         with self.connection.cursor() as cursor:
             for room in rooms_data:
                 cursor.execute(sql.SQL("""
@@ -37,7 +38,7 @@ class DatabaseManager:
                 """), (room['id'], room['name']))
         self.connection.commit()
 
-    def insert_students_data(self, students_data):
+    def insert_students_data(self, students_data: List[Dict[str, Any]]) -> None:
         with self.connection.cursor() as cursor:
             for student in students_data:
                 cursor.execute(sql.SQL("""

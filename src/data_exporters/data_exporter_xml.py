@@ -4,7 +4,7 @@ from psycopg2 import sql
 
 
 class DataExporterXml:
-    def __init__(self, connection):
+    def __init__(self, connection) -> None:
         self.connection = connection
 
     def export_rooms_to_xml(self, table_name, file_path):

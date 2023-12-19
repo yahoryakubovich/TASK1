@@ -5,12 +5,7 @@ from database.database_connector import DatabaseConnector
 from database.database_manager import DatabaseManager
 from data_exporters.data_exporter_json import DataExporterJson
 from data_exporters.data_exporter_xml import DataExporterXml
-
-DB_HOST = 'localhost'
-DB_PORT = 5432
-DB_NAME = 'dormitory'
-DB_USER = 'postgres'
-DB_PASSWORD = '831212'
+from src.config import *
 
 
 def process_data(students_file_path, rooms_file_path, output_format):

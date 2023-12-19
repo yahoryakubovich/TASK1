@@ -1,9 +1,8 @@
 import psycopg2
-from psycopg2 import sql
 
 
 class DatabaseConnector:
-    def __init__(self, host, port, database, user, password):
+    def __init__(self, host: str, port: str, database: str, user: str, password: str):
         self.host = host
         self.port = port
         self.database = database
@@ -11,7 +10,7 @@ class DatabaseConnector:
         self.password = password
         self.connection = None
 
-    def connect(self):
+    def connect(self) -> None:
         self.connection = psycopg2.connect(
             host=self.host,
             port=self.port,
@@ -20,6 +19,6 @@ class DatabaseConnector:
             password=self.password
         )
 
-    def close(self):
+    def close(self) -> None:
         if self.connection:
             self.connection.close()
